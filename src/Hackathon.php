@@ -31,6 +31,9 @@ class Hackathon {
         }
     }
     
+    /*
+    * Register new user in database if all conditions pass
+    */
     public function registerUser() {
         // get data
         $this->getdata();
@@ -75,6 +78,9 @@ class Hackathon {
         $this->data = (array) json_decode(file_get_contents('php://input'), TRUE);
     }
     
+    /*
+    * Validate romnian CNP
+    */
     private function validateCNP($cnp) {
         // CNP must have 13 characters
         if(strlen($cnp) != 13) {
@@ -117,6 +123,9 @@ class Hackathon {
         return ($year > 1800 && $year < 2099 && $cnp[12] == $hashResult);
     }
     
+    /*
+    * Checks if user already exists
+    */
     public function userExists() {
         $statement = 'SELECT COUNT(*) FROM user WHERE CNP = ?;';
         try {
@@ -129,6 +138,9 @@ class Hackathon {
         }
     }
     
+    /*
+    * Get user via CNP
+    */
     public function getUser() {
         $statement = 'SELECT id FROM user WHERE CNP = ?;';
         try {
@@ -141,6 +153,9 @@ class Hackathon {
         }
     }
     
+    /*
+    * Get program
+    */
     public function getProgram($id) {
         $statement = 'SELECT * FROM programs WHERE id = ?;';
         try {
@@ -153,6 +168,9 @@ class Hackathon {
         }
     }
     
+    /*
+    * Checks if room exists
+    */
     public function roomExists() {
         $statement = 'SELECT COUNT(*) FROM rooms WHERE id = ?;';
         try {
@@ -165,6 +183,9 @@ class Hackathon {
         }
     }
     
+    /*
+    * Checks if program exists
+    */
     public function programExists($id) {
         $statement = 'SELECT COUNT(*) FROM programs WHERE id = ?;';
         try {
@@ -177,6 +198,9 @@ class Hackathon {
         }
     }
     
+    /*
+    * Get user role ,Admin (1) , Client (2)  via CNP
+    */
     public function getUserRole() {
         $statement = 'SELECT role FROM user WHERE CNP = ?;';
         try {

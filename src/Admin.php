@@ -12,6 +12,9 @@ class Admin extends Hackathon {
         parent::__construct();
     }
     
+    /*
+    * Gets all programs from the database
+    */
     public function getPrograms() {
         $statement = 'SELECT * FROM programs;';
         try {
@@ -24,6 +27,9 @@ class Admin extends Hackathon {
         }
     }
     
+    /*
+    * Adds a program in the database if all conditions pass
+    */
     public function addProgram() {
         // get data
         $this->getdata();
@@ -79,6 +85,9 @@ class Admin extends Hackathon {
         }
     }
     
+    /*
+    * Deletes a program from the database
+    */
     public function deleteProgram() {    
         // get data
         $this->getdata();
@@ -99,7 +108,7 @@ class Admin extends Hackathon {
         $statement = 'DELETE FROM programs WHERE id = ?;';
         try {
             $statement = $this->db->prepare($statement);
-            $statement->execute(array($this->data['id']));
+            $statement->execute(array($this->data['program']));
             echo 'Succesfully deleted program';
         } catch (\PDOException $e) {
             exit($e->getMessage());
@@ -115,6 +124,9 @@ class Admin extends Hackathon {
         return true;
     }
     
+    /*
+    * Checks type of program
+    */
     private function checkType() {
         $statement = 'SELECT COUNT(*) FROM program_type WHERE id = ?;';
         try {
@@ -127,6 +139,9 @@ class Admin extends Hackathon {
         }
     }
     
+    /*
+    * Checks if is admin
+    */
     private function isAdmin() {
         if ($this->getUserRole() == 1) {
             return TRUE;

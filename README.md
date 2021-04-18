@@ -13,13 +13,39 @@ You have estimated it takes 4 weeks to build this solution. You have 2 days. Goo
 
 ## Technical documentation
 ### Data and Domain model
-In this section, please describe the main entities you managed to identify, the relationships between them and how you mapped them in the database.
+User:
+    Users can be created using the registerUser endpoint. User can be admin (role 1) or client (role 2).
+    User can only be created with a valid CNP and Name.
+    Admins can create new programs using the addProgram endpoint.
+    Client can book a program using the addBooking endpoint.
+    
+Programs:
+    Programs can be created and deleted only by admins. Each program must have a type and a room.  
+    Rooms are hardcoded in the database and contain id and name.
+    Program types are hardcoded in the database and contain id and name.
+    Programs must have an start_date and end_date and can be limited to a number of maximum participants.
+    Users can view the programs using the getPrograms.php
+    
+Booking:
+    Client can register to a program using the addBooking.php endpoint.
+    In order to register, client must have a valid account and provide the program id.
+    A number of validations will take place when booking.
+    If successfully validated the user will be booked to the program.
+
 ### Application architecture
-In this section, please provide a brief overview of the design of your application and highlight the main components and the interaction between them.
+Application contains a main class "Hackathon" that is used to connect to the database and allow registration of users.
+Class "Admin" extends the main class and allows admin users to create and delete programs.
+Class "Client" extends the main class and allows client to register to a program.
+Endpoints are created in the /api folder and each will call the specific function from the object.
+Database contains the following tables:
+    - user: id, role, cnp, name
+    - programs: id, type_id, room_id, max_user, start_date, end_date
+    - program_type: id, name
+    - rooms: id, name
+    - booking: id, user_id, program_id
+
 ###  Implementation
 ##### Functionalities
-For each of the following functionalities, please tick the box if you implemented it and describe its input and output in your application:
-
 [x] Register user
         Endpoint: /api/registerUser.php
         Description: Adds a new user to database via a valid CNP. User must have a role - 1 (Admin) or 2 (Client) and a name.
@@ -31,15 +57,74 @@ For each of the following functionalities, please tick the box if you implemente
             "name": (string)
         }
 [x] Create programme
+        Endpoint: /api/addProgram.php
+        Description: Adds a new program to database via a valid CNP of a Admin. 
+        Request Type: POST
+        Request Parameters (JSON):
+        {
+            "cnp": (int) ,
+            "type": (int)
+            "room": (int)
+            "start_date": (timestamp),
+            "end_date": (timestamp),
+            "max_user": (int)
+        }
 [x] Delete programme
+        Endpoint: /api/deleteProgram.php
+        Description: Deletes a program from the database based on a valid CNP of Admin. 
+        Request Type: GET
+        Request Parameters (JSON):
+        {
+              "cnp": (int),
+              "program": (int)
+        }
 [x] Book a programme
+        Endpoint: /api/addBooking.php
+        Description: Adds a new booking to database using a valid client CNP.
+        Request Type: GET
+        Request Parameters (JSON):
+        {
+              "cnp": (int),
+              "program": (int)
+        }
 [x] Get programs
-
+        Endpoint: /api/getPrograms.php
+        Description: Gets all programs from the database.
+        Request Type: GET
+        Response exemple (JSON):
+        [
+            {
+                "id": "14",
+                "type_id": "2",
+                "room_id": "3",
+                "max_user": "2",
+                "start_date": "2021-04-17 21:27:52",
+                "end_date": "2021-04-17 21:27:47"
+            },
+            {
+                "id": "16",
+                "type_id": "2",
+                "room_id": "2",
+                "max_user": "10",
+                "start_date": "2021-04-30 10:44:43",
+                "end_date": "2021-04-30 10:44:35"
+            }
+        ]
 ##### Business rules
-Please highlight all the validations and mechanisms you identified as necessary in order to avoid inconsistent states and apply the business logic in your application.
+In order to use the application, a valid user must be created. In order to register an accont, a valid CNP and Name is needed.
+Validations take part on both admin and client side:
+    Admin:
+        - when creating a program we validate account and that provided program_type and room exists in the database. Also program must have start_date and end_date (end_date cannot be lower that start_date) and max_users must be provided
+        - when deleting a program we validate account and that program_id exists in the database
+    Client:
+        - validate that user has an account
+        - validate if user role is Client
+        - validate if the program exists and program date is not due
+        - validate if the client is not already booked to the program
+        - validate if client does not have another booked program in the same time interval
+        - validate if program maximum participants has not been reached 
 
 ##### Environment
-Please fill in the following table with the technologies you used in order to work at your application. Feel free to add more rows if you want us to know about anything else you used.
 | Name | Choice |
 | Operating system (OS) | Windows 10 |
 | Database  | MySQL 8.0|
@@ -48,18 +133,35 @@ Please fill in the following table with the technologies you used in order to wo
 | IDE | Brackets |
 
 ### Testing
-In this section, please list the steps and/ or tools you've used in order to test the behaviour of your solution.
+Each endpoint has been tested using POSTMAN.
 
 ## Feedback
 In this section, please let us know what is your opinion about this experience and how we can improve it:
 
 1. Have you ever been involved in a similar experience? If so, how was this one different?
+    No, this is the first experience of this kind.
+    
 2. Do you think this type of selection process is suitable for you?
+    Yes, it was a good experience for me because it made me learn more.It challenged me to give my best to deliver my solution for this task.
+    
 3. What's your opinion about the complexity of the requirements?
+    This test was pretty difficult in my opinion, but it made me really focus on the task and search different approaches and solutions.
+    
 4. What did you enjoy the most?
+    I liked the free choice of how to implement this application.
+    
 5. What was the most challenging part of this anti hackathon?
+    The most challenging part of this was , in my opinion, the validation of the programs to not overlap. And also I didn't have much experience with API and it gave me more work.
+    
 6. Do you think the time limit was suitable for the requirements?
+    Yes. Sometimes less is more.
+    
 7. Did you find the resources you were sent on your email useful?
+    Yes, it helped me be prepared better.
+    
 8. Is there anything you would like to improve to your current implementation?
+    With more time I would optimize my work better and have more validations and also security.
+    
 9. What would you change regarding this anti hackathon?
+    In this moment nothing.
 
