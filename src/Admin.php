@@ -1,14 +1,27 @@
 <?php
+require 'Hackathon.php';
+
 /* 
 * Class Admin 
 * Handles adding and deletion of programs for admin users
+*
 */
-require 'Hackathon.php';
-
 class Admin extends Hackathon {
     
     public function __construct() {
         parent::__construct();
+    }
+    
+    public function getPrograms() {
+        $statement = 'SELECT * FROM programs;';
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute();
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            echo json_encode($result);
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
     }
     
     public function addProgram() {
@@ -23,6 +36,11 @@ class Admin extends Hackathon {
             exit('Please provide program type');
         } elseif(!$this->checkType()){
             exit('Invalid program type');
+        }
+        if (!isset($this->data['room']) || empty($this->data['room'])) {
+            exit('Please provide room');
+        } elseif(!$this->roomExists()){
+            exit('The room does not exist');
         } 
         if (!isset($this->data['start_date']) || empty($this->data['start_date'])) {
             exit('Please provide a valid start date');
@@ -43,12 +61,13 @@ class Admin extends Hackathon {
         // check if user exists and has permission
         if ($this->userExists() && $this->isAdmin()) {
             // insert user to database
-            $statement = 'INSERT INTO programs (type_id, max_user, start_date, end_date) VALUES (:type_id, :max_user, FROM_UNIXTIME(:start_date), FROM_UNIXTIME(:end_date));';
+            $statement = 'INSERT INTO programs (type_id, room_id, max_user, start_date, end_date) VALUES (:type_id, :room_id, :max_user, FROM_UNIXTIME(:start_date), FROM_UNIXTIME(:end_date));';
 
             try {
                 $statement = $this->db->prepare($statement);
                 $statement->execute(array(
                     'type_id' => $this->data['type'],
+                    'room_id' => $this->data['room'],
                     'max_user' => $this->data['max_user'],
                     'start_date' => $this->data['start_date'],
                     'end_date' => $this->data['end_date']
@@ -60,9 +79,36 @@ class Admin extends Hackathon {
         }
     }
     
+    public function deleteProgram() {    
+        // get data
+        $this->getdata();
+        
+        //validate data
+        if (!isset($this->data['cnp']) || empty($this->data['cnp'])) {
+            exit('Please provide CNP');
+        } elseif (!$this->isAdmin()) {
+            exit('Only and admin can delete a program');
+        }
+        
+        if (!isset($this->data['program']) || empty($this->data['program'])) {
+            exit('Please provide a program id');
+        } elseif(!$this->programExists($this->data['program'])){
+            exit('Program does not exist');
+        }
+        
+        $statement = 'DELETE FROM programs WHERE id = ?;';
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array($this->data['id']));
+            echo 'Succesfully deleted program';
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+    
     private function isTimestamp($timestamp) {
         if (!ctype_digit($timestamp)) return false;
-        $x = strlen($timestamp) >= 13 ? $timestamp / 1000 : $timestamp;
+            $timestamp = strlen($timestamp) >= 13 ? $timestamp / 1000 : $timestamp;
         if ($timestamp < strtotime('-30 years') || $timestamp > strtotime('+30 years')) {   
             return false;
         }

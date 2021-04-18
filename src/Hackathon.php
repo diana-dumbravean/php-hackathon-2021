@@ -3,9 +3,8 @@
 /* 
 * Class Hackathon
 * Main Class 
-* Connects to DB
+* Connects to DB and handles user registrations
 */
-
 class Hackathon {
     
     public function __construct() {
@@ -30,11 +29,6 @@ class Hackathon {
         } catch (\PDOException $e) {
             exit($e->getMessage());
         }
-    }
-    
-    public function getUsers() {
-        $users = $this->select('SELECT id, role, CNP, name FROM user;');
-        echo json_encode($users);
     }
     
     public function registerUser() {
@@ -128,6 +122,54 @@ class Hackathon {
         try {
             $statement = $this->db->prepare($statement);
             $statement->execute(array($this->data['cnp']));
+            $result = $statement->fetchColumn();
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+    
+    public function getUser() {
+        $statement = 'SELECT id FROM user WHERE CNP = ?;';
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array($this->data['cnp']));
+            $result = $statement->fetchColumn();
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+    
+    public function getProgram($id) {
+        $statement = 'SELECT * FROM programs WHERE id = ?;';
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array($id));
+            $result = $statement->fetchObject();
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+    
+    public function roomExists() {
+        $statement = 'SELECT COUNT(*) FROM rooms WHERE id = ?;';
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array($this->data['room']));
+            $result = $statement->fetchColumn();
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+    
+    public function programExists($id) {
+        $statement = 'SELECT COUNT(*) FROM programs WHERE id = ?;';
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array($id));
             $result = $statement->fetchColumn();
             return $result;
         } catch (\PDOException $e) {
